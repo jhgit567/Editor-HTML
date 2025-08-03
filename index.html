@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Editor HTML</title>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #12141f;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background: #1e2134;
+      color: #0af;
+      padding: 12px;
+      text-align: center;
+      font-size: 1.3rem;
+      font-family: 'Fira Code', monospace;
+      font-weight: bold;
+    }
+    #toolbar {
+      display: flex;
+      gap: 12px;
+      background: #1e2134;
+      padding: 10px;
+      justify-content: center;
+      border-bottom: 1px solid #444;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #0af;
+      border: none;
+      padding: 10px 18px;
+      color: white;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Fira Code', monospace;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0077cc;
+    }
+    /* Botão Ajude-nos */
+    .help-btn {
+      background: #ff4081;
+    }
+    .help-btn:hover {
+      background: #e91e63;
+    }
+    #main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    #editor-container {
+      display: flex;
+      flex: 1;
+      background: #1b1e2a;
+      border-right: 2px solid #0af;
+    }
+    #line-numbers {
+      background: #171a25;
+      color: #777;
+      text-align: right;
+      padding: 10px;
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      user-select: none;
+      width: 40px;
+    }
+    textarea#editor {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: #fff;
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      padding: 10px;
+      resize: none;
+      outline: none;
+      line-height: 1.4em;
+    }
+    iframe#preview {
+      flex: 1;
+      border: none;
+      background: white;
+    }
+    @media (max-width: 900px) {
+      #main {
+        flex-direction: column;
+      }
+      #editor-container, iframe#preview {
+        flex: none;
+        height: 50vh;
+        width: 100%;
+        border-right: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>Mini Editor HTML</header>
+  <div id="toolbar">
+    <button id="run">Rodar</button>
+    <button id="download">Baixar</button>
+    <button id="clear">Limpar</button>
+    <button class="help-btn" onclick="window.open('https://linkvertise.com/seu-link', '_blank')">❤️ Ajude-nos</button>
+  </div>
+  <div id="main">
+    <div id="editor-container">
+      <div id="line-numbers"></div>
+      <textarea id="editor" spellcheck="false" wrap="off">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini Editor HTML</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    h1 { color: #007acc; }
+  </style>
+</head>
+<body>
+  <h1>Olá, mundo!</h1>
+  <p>Este é um mini editor HTML com preview, download e limpar.</p>
+</body>
+</html>
+      </textarea>
+    </div>
+    <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
+
+  <script>
+    const editor = document.getElementById('editor');
+    const preview = document.getElementById('preview');
+    const runBtn = document.getElementById('run');
+    const downloadBtn = document.getElementById('download');
+    const clearBtn = document.getElementById('clear');
+    const lineNumbers = document.getElementById('line-numbers');
+
+    function updateLineNumbers() {
+      const linesCount = editor.value.split('\n').length;
+      lineNumbers.innerHTML = '';
+      for(let i = 1; i <= linesCount; i++) {
+        const line = document.createElement('div');
+        line.textContent = i;
+        lineNumbers.appendChild(line);
+      }
+    }
+
+    function syncScroll() {
+      lineNumbers.scrollTop = editor.scrollTop;
+    }
+
+    function updatePreview() {
+      const code = editor.value;
+      const blob = new Blob([code], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      preview.src = url;
+      preview.onload = () => URL.revokeObjectURL(url);
+    }
+
+    function downloadHTML() {
+      const code = editor.value;
+      const blob = new Blob([code], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'meu-projeto.html';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function clearEditor() {
+      if(confirm('Tem certeza que deseja limpar o editor?')) {
+        editor.value = '';
+        updateLineNumbers();
+        preview.src = 'about:blank';
+      }
+    }
+
+    runBtn.addEventListener('click', updatePreview);
+    downloadBtn.addEventListener('click', downloadHTML);
+    clearBtn.addEventListener('click', clearEditor);
+
+    editor.addEventListener('input', () => {
+      updateLineNumbers();
+      updatePreview();
+    });
+
+    editor.addEventListener('scroll', syncScroll);
+
+    document.addEventListener('keydown', (e) => {
+      if(e.ctrlKey && e.key === 'Enter') {
+        updatePreview();
+      }
+    });
+
+    updateLineNumbers();
+    updatePreview();
+  </script>
+</body>
+</html>
