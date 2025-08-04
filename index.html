@@ -1,211 +1,367 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mini Editor HTML</title>
-  
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #12141f;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    header {
-      background: #1e2134;
-      color: #0af;
-      padding: 12px;
-      text-align: center;
-      font-size: 1.3rem;
-      font-family: 'Fira Code', monospace;
-      font-weight: bold;
-    }
-    #toolbar {
-      display: flex;
-      gap: 12px;
-      background: #1e2134;
-      padding: 10px;
-      justify-content: center;
-      border-bottom: 1px solid #444;
-      flex-wrap: wrap;
-    }
-    button {
-      background: #0af;
-      border: none;
-      padding: 10px 18px;
-      color: white;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: 'Fira Code', monospace;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #0077cc;
-    }
-    /* Botão Ajude-nos */
-    .help-btn {
-      background: #ff4081;
-    }
-    .help-btn:hover {
-      background: #e91e63;
-    }
-    #main {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
-    #editor-container {
-      display: flex;
-      flex: 1;
-      background: #1b1e2a;
-      border-right: 2px solid #0af;
-    }
-    #line-numbers {
-      background: #171a25;
-      color: #777;
-      text-align: right;
-      padding: 10px;
-      font-family: 'Fira Code', monospace;
-      font-size: 14px;
-      user-select: none;
-      width: 40px;
-    }
-    textarea#editor {
-      flex: 1;
-      border: none;
-      background: transparent;
-      color: #fff;
-      font-family: 'Fira Code', monospace;
-      font-size: 14px;
-      padding: 10px;
-      resize: none;
-      outline: none;
-      line-height: 1.4em;
-    }
-    iframe#preview {
-      flex: 1;
-      border: none;
-      background: white;
-    }
-    @media (max-width: 900px) {
-      #main {
-        flex-direction: column;
-      }
-      #editor-container, iframe#preview {
-        flex: none;
-        height: 50vh;
-        width: 100%;
-        border-right: none;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini VS Code com Gerenciamento de Arquivos</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    font-family: 'Fira Code', monospace;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  #top-bar {
+    background: #252526;
+    padding: 6px 12px;
+    font-size: 14px;
+    color: #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #top-bar .menu {
+    display: flex;
+    gap: 12px;
+  }
+  #top-bar span {
+    cursor: pointer;
+  }
+  #top-bar span:hover {
+    color: #fff;
+  }
+  .help-btn {
+    background: #ff4081;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .help-btn:hover {
+    background: #e91e63;
+  }
+  #container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  #sidebar {
+    width: 250px;
+    background: #252526;
+    padding: 8px;
+    overflow-y: auto;
+    font-size: 13px;
+    border-right: 1px solid #333;
+  }
+  #sidebar h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sidebar-actions span {
+    margin-left: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #0a84ff;
+  }
+  .sidebar-actions span:hover {
+    color: #fff;
+  }
+  .file {
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .file:hover {
+    background: #333;
+  }
+  .file-actions span {
+    margin-left: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #888;
+  }
+  .file-actions span:hover {
+    color: #fff;
+  }
+  #main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  #toolbar {
+    background: #333;
+    padding: 8px;
+    display: flex;
+    gap: 8px;
+  }
+  #toolbar button {
+    background: #0a84ff;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  #toolbar button:hover {
+    background: #007acc;
+  }
+  #editor-preview-container {
+    flex: 1;
+    display: flex;
+    border-top: 1px solid #333;
+  }
+  #editor-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #1e1e1e;
+  }
+  #line-numbers {
+    width: 40px;
+    background: #2d2d2d;
+    text-align: right;
+    padding: 10px 4px;
+    color: #858585;
+    overflow: hidden;
+    user-select: none;
+  }
+  #editor {
+    flex: 1;
+    border: none;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-size: 14px;
+    padding: 10px;
+    resize: none;
+    outline: none;
+    font-family: 'Fira Code', monospace;
+  }
+  #preview {
+    flex: 1;
+    border: none;
+    background: white;
+  }
+  #status-bar {
+    background: #007acc;
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
 </head>
 <body>
-  <header>Mini Editor HTML</header>
-  <div id="toolbar">
-    <button id="run">Rodar</button>
-    <button id="download">Baixar</button>
-    <button id="clear">Limpar</button>
-    <button class="help-btn" onclick="window.open('https://linkvertise.com/1377995/rAm2KV2mSsCs?o=sharing', '_blank')">❤️ Ajude-nos</button>
-  </div>
-  <div id="main">
-    <div id="editor-container">
-      <div id="line-numbers"></div>
-      <textarea id="editor" spellcheck="false" wrap="off">
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>Mini Editor HTML</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
-    h1 { color: #007acc; }
-  </style>
-</head>
-<body>
-  <h1>Olá, mundo!</h1>
-  <p>Este é um mini editor HTML com preview, download e limpar.</p>
-</body>
-</html>
-      </textarea>
+  <div id="top-bar">
+    <div class="menu">
+      <span id="menu-file">Abrir Pasta</span>
     </div>
-    <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+    <button class="help-btn" onclick="window.open('https://linkvertise.com/1377995/rAm2KV2mSsCs?o=sharing', '_blank')">
+      ❤️ Ajude-nos
+    </button>
+  </div>
+  <div id="container">
+    <div id="sidebar">
+      <h3>
+        EXPLORER
+        <div class="sidebar-actions">
+          <span id="add-file">+</span>
+          <span id="add-folder">📁</span>
+        </div>
+      </h3>
+      <div id="file-list">Nenhuma pasta carregada</div>
+    </div>
+    <div id="main-area">
+      <div id="toolbar">
+        <button id="save">Salvar</button>
+        <button id="run">Rodar</button>
+      </div>
+      <div id="editor-preview-container">
+        <div id="editor-container">
+          <div style="display:flex;flex:1;">
+            <div id="line-numbers"></div>
+            <textarea id="editor" spellcheck="false"></textarea>
+          </div>
+        </div>
+        <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+      <div id="status-bar">
+        <span id="file-info">Nenhum arquivo aberto</span>
+        <span>UTF-8</span>
+      </div>
+    </div>
   </div>
 
-  <script>
-    const editor = document.getElementById('editor');
-    const preview = document.getElementById('preview');
-    const runBtn = document.getElementById('run');
-    const downloadBtn = document.getElementById('download');
-    const clearBtn = document.getElementById('clear');
-    const lineNumbers = document.getElementById('line-numbers');
+<script>
+  const fileListDiv = document.getElementById('file-list');
+  const editor = document.getElementById('editor');
+  const lineNumbers = document.getElementById('line-numbers');
+  const preview = document.getElementById('preview');
+  const fileInfo = document.getElementById('file-info');
+  const addFileBtn = document.getElementById('add-file');
+  const addFolderBtn = document.getElementById('add-folder');
+  let currentFileHandle = null;
+  let currentDirHandle = null;
+  let openFiles = {};
+  let currentFileName = '';
 
-    function updateLineNumbers() {
-      const linesCount = editor.value.split('\n').length;
-      lineNumbers.innerHTML = '';
-      for(let i = 1; i <= linesCount; i++) {
-        const line = document.createElement('div');
-        line.textContent = i;
-        lineNumbers.appendChild(line);
+  document.getElementById('menu-file').addEventListener('click', openFolder);
+
+  async function openFolder() {
+    try {
+      currentDirHandle = await window.showDirectoryPicker();
+      loadFiles();
+    } catch (err) {
+      alert('Falha ao abrir pasta: ' + err);
+    }
+  }
+
+  async function loadFiles() {
+    fileListDiv.innerHTML = '';
+    for await (const entry of currentDirHandle.values()) {
+      if (entry.kind === 'file') {
+        addFileToExplorer(entry);
       }
     }
+  }
 
-    function syncScroll() {
-      lineNumbers.scrollTop = editor.scrollTop;
-    }
+  function addFileToExplorer(fileHandle) {
+    const fileDiv = document.createElement('div');
+    fileDiv.textContent = fileHandle.name;
+    fileDiv.className = 'file';
 
-    function updatePreview() {
-      const code = editor.value;
-      const blob = new Blob([code], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      preview.src = url;
-      preview.onload = () => URL.revokeObjectURL(url);
-    }
+    const actions = document.createElement('div');
+    actions.className = 'file-actions';
+    const renameBtn = document.createElement('span');
+    renameBtn.textContent = '✏';
+    const deleteBtn = document.createElement('span');
+    deleteBtn.textContent = '🗑';
 
-    function downloadHTML() {
-      const code = editor.value;
-      const blob = new Blob([code], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'meu-projeto.html';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    renameBtn.onclick = () => renameFile(fileHandle);
+    deleteBtn.onclick = () => deleteFile(fileHandle);
 
-    function clearEditor() {
-      if(confirm('Tem certeza que deseja limpar o editor?')) {
-        editor.value = '';
-        updateLineNumbers();
-        preview.src = 'about:blank';
-      }
-    }
+    actions.appendChild(renameBtn);
+    actions.appendChild(deleteBtn);
+    fileDiv.appendChild(actions);
 
-    runBtn.addEventListener('click', updatePreview);
-    downloadBtn.addEventListener('click', downloadHTML);
-    clearBtn.addEventListener('click', clearEditor);
-
-    editor.addEventListener('input', () => {
-      updateLineNumbers();
-      updatePreview();
+    fileDiv.addEventListener('click', (e) => {
+      if (e.target === renameBtn || e.target === deleteBtn) return;
+      loadFile(fileHandle);
     });
 
-    editor.addEventListener('scroll', syncScroll);
+    fileListDiv.appendChild(fileDiv);
+  }
 
-    document.addEventListener('keydown', (e) => {
-      if(e.ctrlKey && e.key === 'Enter') {
-        updatePreview();
-      }
-    });
+  async function loadFile(fileHandle) {
+    currentFileHandle = fileHandle;
+    currentFileName = fileHandle.name;
+    fileInfo.textContent = currentFileName;
 
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    editor.value = text;
+    openFiles[currentFileName] = text;
     updateLineNumbers();
     updatePreview();
-  </script>
+  }
+
+  async function saveFile() {
+    if (!currentFileHandle) {
+      alert('Nenhum arquivo aberto!');
+      return;
+    }
+    const writable = await currentFileHandle.createWritable();
+    await writable.write(editor.value);
+    await writable.close();
+    openFiles[currentFileName] = editor.value;
+    alert('Arquivo salvo!');
+    updatePreview();
+  }
+
+  async function createFile() {
+    if (!currentDirHandle) {
+      alert('Abra uma pasta primeiro!');
+      return;
+    }
+    const name = prompt('Digite o nome do arquivo (ex: index.html):');
+    if (!name) return;
+
+    const newHandle = await currentDirHandle.getFileHandle(name, { create: true });
+    const writable = await newHandle.createWritable();
+    await writable.write('');
+    await writable.close();
+
+    currentFileHandle = newHandle;
+    currentFileName = name;
+    openFiles[currentFileName] = '';
+    editor.value = '';
+    updateLineNumbers();
+    fileInfo.textContent = currentFileName;
+
+    await loadFiles();
+  }
+
+  async function createFolder() {
+    alert('Infelizmente, criar pasta não é suportado diretamente via File System Access API em todos os navegadores.');
+  }
+
+  async function renameFile(fileHandle) {
+    alert('Renomear arquivo ainda não é suportado por limitações da API no navegador.');
+  }
+
+  async function deleteFile(fileHandle) {
+    alert('Excluir arquivo também não é suportado diretamente via API, apenas manualmente no sistema.');
+  }
+
+  function updateLineNumbers() {
+    const lines = editor.value.split('\n');
+    lineNumbers.innerHTML = lines.map((_, i) => (i+1)).join('\n');
+  }
+
+  function updatePreview() {
+    const htmlFile = Object.keys(openFiles).find(f => f.endsWith('.html'));
+    const cssFile = Object.keys(openFiles).find(f => f.endsWith('.css'));
+    const jsFile = Object.keys(openFiles).find(f => f.endsWith('.js'));
+
+    let htmlContent = htmlFile ? openFiles[htmlFile] : '<html><body><p>Nenhum HTML carregado</p></body></html>';
+    const cssContent = cssFile ? `<style>${openFiles[cssFile]}</style>` : '';
+    const jsContent = jsFile ? `<script>${openFiles[jsFile]}<\/script>` : '';
+
+    const finalHTML = htmlContent.replace('</head>', cssContent + '</head>').replace('</body>', jsContent + '</body>');
+
+    const blob = new Blob([finalHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    preview.src = url;
+    preview.onload = () => URL.revokeObjectURL(url);
+  }
+
+  editor.addEventListener('input', () => {
+    if (currentFileName) {
+      openFiles[currentFileName] = editor.value;
+      updateLineNumbers();
+      updatePreview();
+    }
+  });
+
+  document.getElementById('save').addEventListener('click', saveFile);
+  document.getElementById('run').addEventListener('click', updatePreview);
+  addFileBtn.addEventListener('click', createFile);
+  addFolderBtn.addEventListener('click', createFolder);
+
+  updateLineNumbers();
+</script>
 </body>
 </html>
