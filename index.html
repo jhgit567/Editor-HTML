@@ -1,208 +1,354 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" >
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mini VS Code com Gerenciamento de Arquivos</title>
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
-<style>
-  body {
-    margin: 0;
-    font-family: 'Fira Code', monospace;
-    background: #1e1e1e;
-    color: #d4d4d4;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  #top-bar {
-    background: #252526;
-    padding: 6px 12px;
-    font-size: 14px;
-    color: #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  #top-bar .menu {
-    display: flex;
-    gap: 12px;
-  }
-  #top-bar span {
-    cursor: pointer;
-  }
-  #top-bar span:hover {
-    color: #fff;
-  }
-  .help-btn {
-    background: #ff4081;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  .help-btn:hover {
-    background: #e91e63;
-  }
-  #container {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-  #sidebar {
-    width: 250px;
-    background: #252526;
-    padding: 8px;
-    overflow-y: auto;
-    font-size: 13px;
-    border-right: 1px solid #333;
-  }
-  #sidebar h3 {
-    margin: 0 0 10px;
-    font-size: 14px;
-    color: #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .sidebar-actions span {
-    margin-left: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    color: #0a84ff;
-  }
-  .sidebar-actions span:hover {
-    color: #fff;
-  }
-  .file {
-    padding: 4px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .file:hover {
-    background: #333;
-  }
-  .file-actions span {
-    margin-left: 8px;
-    font-size: 12px;
-    cursor: pointer;
-    color: #888;
-  }
-  .file-actions span:hover {
-    color: #fff;
-  }
-  #main-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  #toolbar {
-    background: #333;
-    padding: 8px;
-    display: flex;
-    gap: 8px;
-  }
-  #toolbar button {
-    background: #0a84ff;
-    color: #fff;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  #toolbar button:hover {
-    background: #007acc;
-  }
-  #editor-preview-container {
-    flex: 1;
-    display: flex;
-    border-top: 1px solid #333;
-  }
-  #editor-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: #1e1e1e;
-  }
-  #line-numbers {
-    width: 40px;
-    background: #2d2d2d;
-    text-align: right;
-    padding: 10px 4px;
-    color: #858585;
-    overflow: hidden;
-    user-select: none;
-  }
-  #editor {
-    flex: 1;
-    border: none;
-    background: #1e1e1e;
-    color: #d4d4d4;
-    font-size: 14px;
-    padding: 10px;
-    resize: none;
-    outline: none;
-    font-family: 'Fira Code', monospace;
-  }
-  #preview {
-    flex: 1;
-    border: none;
-    background: white;
-  }
-  #status-bar {
-    background: #007acc;
-    color: #fff;
-    padding: 6px 10px;
-    font-size: 12px;
-    display: flex;
-    justify-content: space-between;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini VS Code Completo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet" />
+  <style>
+    /* Reset básico */
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: #555 transparent;
+    }
+    *::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    *::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    *::-webkit-scrollbar-thumb {
+      background-color: #555;
+      border-radius: 4px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Fira Code', monospace;
+      background-color: #1e1e2f;
+      color: #cfd8dc;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    /* Top bar */
+    #top-bar {
+      height: 48px;
+      background: linear-gradient(90deg, #007acc, #005a9e);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      justify-content: space-between;
+      font-weight: 600;
+      font-size: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      user-select: none;
+    }
+    #top-bar .left,
+    #top-bar .right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    #top-bar button.help-btn {
+      background: #ff4081;
+      border: none;
+      padding: 8px 14px;
+      font-weight: 700;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 2px 6px #d50062;
+      transition: background-color 0.25s ease;
+      user-select: auto;
+    }
+    #top-bar button.help-btn:hover {
+      background: #d50062;
+    }
+    #btn-snippets {
+      cursor: pointer;
+      font-weight: 600;
+      color: #b0bec5;
+      position: relative;
+      user-select: auto;
+    }
+    #btn-snippets:hover {
+      color: white;
+    }
+    #btn-snippets::after {
+      content: " ▼";
+      font-size: 12px;
+    }
+
+    /* Dropdown Abreviações */
+    #snippets-list {
+      position: absolute;
+      top: 48px;
+      left: 120px;
+      background: #252a42;
+      border-radius: 6px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      width: 160px;
+      display: none;
+      user-select: auto;
+      z-index: 10000;
+      font-size: 14px;
+      color: #cfd8dc;
+    }
+    #snippets-list .snippet-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #3a405c;
+      transition: background 0.15s ease;
+    }
+    #snippets-list .snippet-item:last-child {
+      border-bottom: none;
+    }
+    #snippets-list .snippet-item:hover {
+      background: #3a405c;
+    }
+
+    /* Container geral */
+    #container {
+      display: flex;
+      height: calc(100vh - 48px);
+      overflow: hidden;
+      user-select: text;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      background: #252a42;
+      width: 280px;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #1a2138;
+      user-select: none;
+    }
+    #sidebar h3 {
+      margin: 0 0 16px;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 1px;
+      color: #90a4ae;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .sidebar-actions span {
+      font-weight: 700;
+      font-size: 20px;
+      cursor: pointer;
+      color: #607d8b;
+      transition: color 0.25s ease;
+      user-select: none;
+    }
+    .sidebar-actions span:hover {
+      color: #007acc;
+    }
+
+    #file-list {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 14px;
+      color: #cfd8dc;
+      user-select: auto;
+    }
+    .file {
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: auto;
+      transition: background-color 0.2s ease;
+    }
+    .file:hover, .file.active {
+      background: #007acc;
+      color: white;
+    }
+    .file-actions span {
+      margin-left: 10px;
+      color: #90a4ae;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.25s ease;
+    }
+    .file-actions span:hover {
+      color: #ff5252;
+    }
+
+    /* Main area */
+    #main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      user-select: text;
+    }
+    #toolbar {
+      background: #2d3248;
+      padding: 10px 16px;
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid #1a2138;
+      user-select: none;
+    }
+    #toolbar button {
+      background: #007acc;
+      border: none;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+      user-select: auto;
+      box-shadow: 0 3px 8px rgb(0 122 204 / 0.4);
+    }
+    #toolbar button:hover {
+      background: #005a9e;
+      box-shadow: 0 4px 12px rgb(0 90 158 / 0.6);
+    }
+
+    /* Editor e preview container */
+    #editor-preview-container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      background: #1e1e2f;
+    }
+
+    /* Editor container */
+    #editor-container {
+      flex: 3;
+      display: flex;
+      background: #1e1e2f;
+      box-shadow: inset 4px 0 6px -4px #007acc88;
+    }
+    #line-numbers {
+      width: 50px;
+      background: #252a42;
+      color: #5c6673;
+      padding: 14px 10px 14px 0;
+      font-size: 14px;
+      line-height: 1.5em;
+      text-align: right;
+      user-select: none;
+      overflow-y: auto;
+      border-right: 1px solid #1a2138;
+      font-variant-numeric: tabular-nums;
+      font-family: 'Fira Code', monospace;
+    }
+    #editor {
+      flex: 1;
+      background: #1e1e2f;
+      border: none;
+      outline: none;
+      padding: 14px 16px;
+      color: #cfd8dc;
+      font-size: 14px;
+      line-height: 1.5em;
+      resize: none;
+      font-family: 'Fira Code', monospace;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      caret-color: #007acc;
+      tab-size: 4;
+      user-select: text;
+      min-width: 0;
+    }
+    #editor:focus {
+      outline: none;
+      box-shadow: 0 0 8px 2px #007accaa;
+    }
+
+    /* Preview */
+    #preview {
+      flex: 1;
+      border-left: 1px solid #1a2138;
+      background: white;
+      height: 100%;
+      box-shadow: inset 0 0 10px #007acc22;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      min-width: 0;
+    }
+
+    /* Status bar */
+    #status-bar {
+      height: 32px;
+      background: #007acc;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      user-select: none;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.25);
+    }
+
+  </style>
 </head>
 <body>
+
   <div id="top-bar">
-    <div class="menu">
-      <span id="menu-file">Abrir Pasta</span>
+    <div class="left">
+      Mini VS Code Completo
+      <span id="menu-file" style="margin-left:30px; cursor:pointer; font-weight:600; user-select:auto; color:#a0c4ff;" title="Abrir Pasta">📂 Abrir Pasta</span>
+      <span id="btn-snippets" title="Abreviações de código">Abreviações</span>
     </div>
-    <button class="help-btn" onclick="window.open('https://linkvertise.com/1377995/rAm2KV2mSsCs?o=sharing', '_blank')">
-      ❤️ Ajude-nos
-    </button>
+    <div class="right">
+      <button class="help-btn" title="Ajude-nos e apoie o projeto" onclick="window.open('https://linkvertise.com/1377995/rAm2KV2mSsCs?o=sharing', '_blank')">❤️ Ajude-nos</button>
+    </div>
+
+    <div id="snippets-list">
+      <div class="snippet-item" title="Insere template básico HTML">!html</div>
+    </div>
   </div>
+
   <div id="container">
-    <div id="sidebar">
+    <aside id="sidebar">
       <h3>
         EXPLORER
         <div class="sidebar-actions">
-          <span id="add-file">+</span>
-          <span id="add-folder">📁</span>
+          <span id="add-file" title="Criar novo arquivo">+</span>
+          <span id="add-folder" title="Criar nova pasta">📁</span>
         </div>
       </h3>
       <div id="file-list">Nenhuma pasta carregada</div>
-    </div>
-    <div id="main-area">
+    </aside>
+
+    <main id="main-area">
       <div id="toolbar">
-        <button id="save">Salvar</button>
-        <button id="run">Rodar</button>
+        <button id="save" title="Salvar arquivo atual">Salvar</button>
+        <button id="run" title="Atualizar preview">Rodar</button>
+        <button id="clear" title="Limpar editor">Limpar</button>
       </div>
-      <div id="editor-preview-container">
+      <section id="editor-preview-container">
         <div id="editor-container">
-          <div style="display:flex;flex:1;">
-            <div id="line-numbers"></div>
-            <textarea id="editor" spellcheck="false"></textarea>
-          </div>
+          <div id="line-numbers"></div>
+          <textarea id="editor" spellcheck="false" autofocus></textarea>
         </div>
         <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
-      </div>
-      <div id="status-bar">
+      </section>
+      <footer id="status-bar">
         <span id="file-info">Nenhum arquivo aberto</span>
         <span>UTF-8</span>
-      </div>
-    </div>
+      </footer>
+    </main>
   </div>
 
 <script>
@@ -213,28 +359,73 @@
   const fileInfo = document.getElementById('file-info');
   const addFileBtn = document.getElementById('add-file');
   const addFolderBtn = document.getElementById('add-folder');
+  const btnSnippets = document.getElementById('btn-snippets');
+  const snippetsList = document.getElementById('snippets-list');
+  const clearBtn = document.getElementById('clear');
+  const saveBtn = document.getElementById('save');
+  const runBtn = document.getElementById('run');
+  const menuFileBtn = document.getElementById('menu-file');
+
   let currentFileHandle = null;
   let currentDirHandle = null;
   let openFiles = {};
   let currentFileName = '';
 
-  document.getElementById('menu-file').addEventListener('click', openFolder);
+  const snippets = {
+    "!html": `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<body>
+
+</body>
+</html>`
+  };
+
+  menuFileBtn.addEventListener('click', openFolder);
+
+  btnSnippets.onclick = () => {
+    snippetsList.style.display = snippetsList.style.display === 'none' ? 'block' : 'none';
+  };
+
+  snippetsList.querySelectorAll('.snippet-item').forEach(item => {
+    item.onclick = () => {
+      insertSnippetAtCursor(snippets[item.textContent.trim()]);
+      snippetsList.style.display = 'none';
+      editor.focus();
+    };
+  });
+
+  clearBtn.onclick = () => {
+    if(confirm('Tem certeza que quer limpar o editor?')) {
+      editor.value = '';
+      if(currentFileName) openFiles[currentFileName] = '';
+      updateLineNumbers();
+      updatePreview();
+    }
+  };
 
   async function openFolder() {
     try {
       currentDirHandle = await window.showDirectoryPicker();
-      loadFiles();
-    } catch (err) {
+      await loadFiles();
+    } catch(err) {
       alert('Falha ao abrir pasta: ' + err);
     }
   }
 
   async function loadFiles() {
     fileListDiv.innerHTML = '';
-    for await (const entry of currentDirHandle.values()) {
-      if (entry.kind === 'file') {
+    for await(const entry of currentDirHandle.values()) {
+      if(entry.kind === 'file') {
         addFileToExplorer(entry);
       }
+    }
+    if(!fileListDiv.hasChildNodes()) {
+      fileListDiv.textContent = 'Nenhum arquivo na pasta';
     }
   }
 
@@ -245,20 +436,21 @@
 
     const actions = document.createElement('div');
     actions.className = 'file-actions';
+
     const renameBtn = document.createElement('span');
     renameBtn.textContent = '✏';
     const deleteBtn = document.createElement('span');
     deleteBtn.textContent = '🗑';
 
-    renameBtn.onclick = () => renameFile(fileHandle);
-    deleteBtn.onclick = () => deleteFile(fileHandle);
+    renameBtn.onclick = () => alert('Renomear arquivo não suportado pela API do navegador.');
+    deleteBtn.onclick = () => alert('Excluir arquivo não suportado pela API do navegador.');
 
     actions.appendChild(renameBtn);
     actions.appendChild(deleteBtn);
     fileDiv.appendChild(actions);
 
-    fileDiv.addEventListener('click', (e) => {
-      if (e.target === renameBtn || e.target === deleteBtn) return;
+    fileDiv.addEventListener('click', e => {
+      if(e.target === renameBtn || e.target === deleteBtn) return;
       loadFile(fileHandle);
     });
 
@@ -276,92 +468,148 @@
     openFiles[currentFileName] = text;
     updateLineNumbers();
     updatePreview();
+    setActiveFileInExplorer();
+  }
+
+  function setActiveFileInExplorer() {
+    const files = document.querySelectorAll('#file-list .file');
+    files.forEach(f => {
+      if(f.textContent.startsWith(currentFileName)) {
+        f.classList.add('active');
+      } else {
+        f.classList.remove('active');
+      }
+    });
   }
 
   async function saveFile() {
-    if (!currentFileHandle) {
+    if(!currentFileHandle) {
       alert('Nenhum arquivo aberto!');
       return;
     }
-    const writable = await currentFileHandle.createWritable();
-    await writable.write(editor.value);
-    await writable.close();
-    openFiles[currentFileName] = editor.value;
-    alert('Arquivo salvo!');
-    updatePreview();
+    try {
+      const writable = await currentFileHandle.createWritable();
+      await writable.write(editor.value);
+      await writable.close();
+      openFiles[currentFileName] = editor.value;
+      alert('Arquivo salvo!');
+      updatePreview();
+    } catch (e) {
+      alert('Erro ao salvar arquivo: ' + e);
+    }
   }
 
   async function createFile() {
-    if (!currentDirHandle) {
+    if(!currentDirHandle) {
       alert('Abra uma pasta primeiro!');
       return;
     }
     const name = prompt('Digite o nome do arquivo (ex: index.html):');
-    if (!name) return;
+    if(!name) return;
 
-    const newHandle = await currentDirHandle.getFileHandle(name, { create: true });
-    const writable = await newHandle.createWritable();
-    await writable.write('');
-    await writable.close();
+    try {
+      const newHandle = await currentDirHandle.getFileHandle(name, {create:true});
+      const writable = await newHandle.createWritable();
+      await writable.write('');
+      await writable.close();
 
-    currentFileHandle = newHandle;
-    currentFileName = name;
-    openFiles[currentFileName] = '';
-    editor.value = '';
-    updateLineNumbers();
-    fileInfo.textContent = currentFileName;
+      currentFileHandle = newHandle;
+      currentFileName = name;
+      openFiles[currentFileName] = '';
+      editor.value = '';
+      updateLineNumbers();
+      fileInfo.textContent = currentFileName;
 
-    await loadFiles();
+      await loadFiles();
+      setActiveFileInExplorer();
+    } catch(e) {
+      alert('Erro ao criar arquivo: ' + e);
+    }
   }
 
   async function createFolder() {
-    alert('Infelizmente, criar pasta não é suportado diretamente via File System Access API em todos os navegadores.');
+    alert('Criar pasta não é suportado pela API do navegador.');
   }
 
-  async function renameFile(fileHandle) {
-    alert('Renomear arquivo ainda não é suportado por limitações da API no navegador.');
+  function insertSnippetAtCursor(text) {
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const before = editor.value.substring(0, start);
+    const after = editor.value.substring(end);
+    editor.value = before + text + after;
+    editor.selectionStart = editor.selectionEnd = start + text.length;
+    updateLineNumbers();
+    updatePreview();
   }
 
-  async function deleteFile(fileHandle) {
-    alert('Excluir arquivo também não é suportado diretamente via API, apenas manualmente no sistema.');
-  }
+  editor.addEventListener('keydown', e => {
+    if(e.key === 'Tab') {
+      e.preventDefault();
+      const pos = editor.selectionStart;
+      const text = editor.value;
 
-  function updateLineNumbers() {
-    const lines = editor.value.split('\n');
-    lineNumbers.innerHTML = lines.map((_, i) => (i+1)).join('\n');
-  }
+      let start = pos;
+      while(start > 0 && /\S/.test(text[start-1])) start--;
+      const word = text.substring(start, pos);
 
-  function updatePreview() {
-    const htmlFile = Object.keys(openFiles).find(f => f.endsWith('.html'));
-    const cssFile = Object.keys(openFiles).find(f => f.endsWith('.css'));
-    const jsFile = Object.keys(openFiles).find(f => f.endsWith('.js'));
-
-    let htmlContent = htmlFile ? openFiles[htmlFile] : '<html><body><p>Nenhum HTML carregado</p></body></html>';
-    const cssContent = cssFile ? `<style>${openFiles[cssFile]}</style>` : '';
-    const jsContent = jsFile ? `<script>${openFiles[jsFile]}<\/script>` : '';
-
-    const finalHTML = htmlContent.replace('</head>', cssContent + '</head>').replace('</body>', jsContent + '</body>');
-
-    const blob = new Blob([finalHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    preview.src = url;
-    preview.onload = () => URL.revokeObjectURL(url);
-  }
-
-  editor.addEventListener('input', () => {
-    if (currentFileName) {
-      openFiles[currentFileName] = editor.value;
-      updateLineNumbers();
-      updatePreview();
+      if(snippets[word]) {
+        const before = text.substring(0, start);
+        const after = text.substring(pos);
+        editor.value = before + snippets[word] + after;
+        editor.selectionStart = editor.selectionEnd = before.length + snippets[word].length;
+        updateLineNumbers();
+        updatePreview();
+      } else {
+        // inserção de 4 espaços padrão
+        const before = text.substring(0, pos);
+        const after = text.substring(pos);
+        editor.value = before + "    " + after;
+        editor.selectionStart = editor.selectionEnd = pos + 4;
+        updateLineNumbers();
+        updatePreview();
+      }
     }
   });
 
-  document.getElementById('save').addEventListener('click', saveFile);
-  document.getElementById('run').addEventListener('click', updatePreview);
-  addFileBtn.addEventListener('click', createFile);
-  addFolderBtn.addEventListener('click', createFolder);
+  editor.addEventListener('input', () => {
+    openFiles[currentFileName] = editor.value;
+    updateLineNumbers();
+  });
 
+  // Atualiza números de linha conforme conteúdo do editor
+  function updateLineNumbers() {
+    const lines = editor.value.split('\n').length;
+    let linesHtml = '';
+    for(let i=1; i<=lines; i++) {
+      linesHtml += i + '\n';
+    }
+    lineNumbers.textContent = linesHtml;
+  }
+
+  // Atualiza preview iframe (só roda HTML)
+  function updatePreview() {
+    if(!currentFileName) {
+      preview.srcdoc = '<p style="padding:20px; font-family: sans-serif;">Nenhum arquivo HTML aberto.</p>';
+      return;
+    }
+    if(currentFileName.endsWith('.html') || currentFileName.endsWith('.htm')) {
+      preview.srcdoc = editor.value;
+    } else {
+      preview.srcdoc = '<p style="padding:20px; font-family: sans-serif;">Preview só disponível para arquivos HTML.</p>';
+    }
+  }
+
+  saveBtn.onclick = saveFile;
+  runBtn.onclick = updatePreview;
+  addFileBtn.onclick = createFile;
+  addFolderBtn.onclick = createFolder;
+
+  // Inicialização
   updateLineNumbers();
+  updatePreview();
+  snippetsList.style.display = 'none';
+
 </script>
+
 </body>
 </html>
